@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <style>
+        body{
+            margin:0;
+            background-color: #f4f4f9;
+        }
+        /* Center the entire game selection container */
+        .gameSelection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Game selection screen container for buttons */
+        .gameSelectionScreen {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        /* Style for each game button and the create button */
+        .gameSceenButton {
+            width: 150px;
+            height: 150px;
+            background-color: #4a90e2;
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 10px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Hover effect for the buttons */
+        .gameSceenButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+            background-color: #357ab7;
+        }
+
+        /* Modal styles */
+        .modal {
+            visibility: hidden;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: white;
+            padding: 30px 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            z-index: 10;
+            width: 300px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .modal.active {
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+
+        .modal h3 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        /* Input fields */
+        .modal input[type="text"] {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px 0px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+
+        /* Custom file input styling */
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .file-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .custom-file-button {
+            width: 100%;
+            padding: 10px 0px;
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .file-label {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Close button for modal */
+        .close-button {
+            position: absolute;
+            background-color: #ed3232;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .createButtonSubmit{
+            width: 100%;
+            background-color: #4a90e2;
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top:20px;
+        }
+
+        .game{
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .gameScreen{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 1280px;
+        }
+
+        .gameTitle{
+            font-size: 2em;
+            margin-top: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .form-container h3 {
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .form-container .sendNoVoiceSubmitButton{
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .textForm {
+            display: flex;
+            gap: 10px;
+            padding-bottom: 5px;
+        }
+
+        .textInput {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+            padding: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .upload-form .textInput {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .upload-form .fileButton,
+        .upload-form .uploadButton {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .upload-form .fileButton:hover,
+        .upload-form .uploadButton:hover {
+            background-color: #0056b3;
+        }
+
+        .textInput::placeholder {
+            color: #aaa;
+        }
+
+        button {
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .hideScreen{
+            visibility: hidden;
+            display: none;
+        }
+
+        /* Success flash background */
+        .flash-success {
+            background-color: #28a745 !important; /* Green color for success */
+            color: #fff !important; /* Ensure text is readable */
+            transition: background-color 0.3s ease;
+        }
+
+        /* Error flash background */
+        .flash-error {
+            background-color: #dc3545 !important; /* Red color for error */
+            color: #fff !important; /* Ensure text is readable */
+            transition: background-color 0.3s ease;
+        }
+
+        .images-container, .sounds-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .image-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .img-container {
+            flex: 1;
+            max-width: 100px;
+            margin-right: 10px;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .size-container, .landing-container, .button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .size-container label, .landing-container label {
+            margin-right: 5px;
+        }
+
+        .image-size-input {
+            border: 1px solid #ccc;
+            color: #333;
+            border-radius: 5px;
+            width: 50px;
+            padding: 10px;
+        }
+
+        .button-container button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .is-landing-checkbox {
+            transform: scale(1.2);
+        }
+
+       .sound-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sounds-container .text-container,
+        .sounds-container .audio-container,
+        .sounds-container .button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .sounds-container .text-container input.sound-text-input {
+            width: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .sounds-container .audio-container audio {
+            width: 200px;
+            height: 30px;
+        }
+
+        .sounds-container .button-container button,
+        .images-container .image-item .button-container button {
+            padding: 5px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            width: 100px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .sounds-container .button-container button:hover,
+        .images-container .image-item .button-container button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="js-gameSelection gameSelection">
+        <div class="js-gameSelectionScreen gameSelectionScreen"></div>
+        <div class="js-createGameButton gameSceenButton">+</div>
+
+        <!-- Modal for creating a new game -->
+        <div class="js-modal modal">
+            <button class="close-button" onclick="closeModal()"></button>
+            <h3>Create Game</h3>
+            <input type="text" id="gameName" placeholder="Game Name" required>
+            
+            <!-- Custom file input -->
+            <div class="file-input-wrapper">
+                <div class="custom-file-button">Choose File</div>
+                <input type="file" id="thumbnail" accept="image/*" class="file-input" required>
+            </div>
+            <span class="file-label">No file chosen</span>
+
+            <button class="createButtonSubmit" onclick="createGame()">Create Game</button>
+        </div>
+    </div>
+
+    <div class="js-game game hideScreen">
+        <div class="js-gameScreen gameScreen">
+            <div class="js-gameTitle gameTitle"></div>
+    
+            <!-- Text Form Section -->
+            <div class="form-container">
+                <h3>Upload Text (no voice)</h3>
+                <form class="textForm" onsubmit="return false;">
+                    <input class="js-sendNoVoiceText textInput" type="text" placeholder="Enter your message..." />
+                    <button class="sendNoVoiceSubmitButton js-sendNoVoiceSubmitButton" type="button" onclick="submitTextForm()">Send</button>
+                </form>
+            </div>
+
+            <!-- Text/Sound Upload Section -->
+            <div class="form-container">
+                <h3>Upload New Text & Sound</h3>
+                <form class="js-soundUploadForm upload-form textform" enctype="multipart/form-data" onsubmit="return false;">
+                    <input class="js-sendVoiceText textInput" type="text" placeholder="Enter your message..." />
+                    <div class="file-input-wrapper js-soundFileInputWrapper file-upload-wrapper">
+                        <div class="custom-file-button js-imageUploadButton upload-button">Choose Sound</div>
+                        <input type="file" id="js-soundFileInput" class="file-input js-soundFileInput" accept="audio/*" required>
+                    </div>
+                    <span class="file-label js-soundFileLabel file-upload-label">No file chosen</span>
+                    <button type="button" class="createButtonSubmit js-soundUploadSubmitButton upload-submit-button" onclick="submitTextVoiceForm()">Upload Text & Sound</button>
+                </form>
+            </div>
+    
+            <!-- Image Upload Section -->
+            <div class="form-container">
+                <h3>Upload New Image</h3>
+                <form id="js-imageUploadForm" class="js-imageUploadForm upload-form" enctype="multipart/form-data" onsubmit="return false;">
+                    <div class="file-input-wrapper js-fileInputWrapper file-upload-wrapper">
+                        <div class="custom-file-button js-imageUploadButton upload-button">Choose Image</div>
+                        <input type="file" id="js-imageFileInput" class="file-input js-imageFileInput" accept="image/*" required>
+                    </div>
+                    <span class="file-label js-imageFileLabel file-upload-label">No file chosen</span>
+                    <button type="button" class="createButtonSubmit js-imageUploadSubmitButton upload-submit-button" onclick="uploadImageFile()">Upload Image</button>
+                </form>
+            </div>
+
+            <div class="images-container form-container">
+                <h3>Available Images</h3>
+                <div class="js-availableImages"></div>
+            </div>
+
+            <div class="sounds-container form-container">
+                <h3>Available Sounds</h3>
+                <div class="js-availableSounds"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let jsGameSelectionScreen, jsGameSelection, jsGame, jsGameScreen;
+        let selectedGameName;
+
+        // Function to play audio
+        function playAudio(soundclip) {
+            const audio = new Audio(soundclip);
+            audio.play().catch(error => {
+                console.error("Audio playback failed: ", error);
+                // Handle errors or prompt for interaction if needed
+            });
+        }
+
+        // Function to update the text associated with a sound
+        const updateSound = async (gameName, soundclip, newText) => {
+            const body= document.querySelector(".js-availableSounds");
+            try {
+                const response = await fetch(`/update-sound-text`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        gameName: gameName,
+                        soundclip: soundclip,
+                        text: newText,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    body.classList.add("flash-success");
+                    setTimeout(() => {
+                        body.classList.remove("flash-success");
+                    }, 200); // Remove the class after 0.2 seconds
+                    playAudio(soundclip);
+                } else {
+                    throw new Error("Failed to update sound text.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                body.classList.add("flash-error");
+                setTimeout(() => {
+                    body.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+            }
+        };
+
+        // Helper function to display sounds in the container with editable fields
+        const displayAvailableSounds = (sounds) => {
+            const container = document.querySelector('.js-availableSounds');
+            container.innerHTML = ''; // Clear any existing content
+
+            sounds.forEach(sound => {
+                const soundDiv = document.createElement('div');
+                soundDiv.classList.add('sound-item');
+
+                // Text section
+                const textContainer = document.createElement('div');
+                textContainer.classList.add('text-container');
+
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.value = sound.text;
+                textInput.id = `text-${sound.soundclip}`;
+                textInput.classList.add('sound-text-input');
+
+                textContainer.appendChild(textInput);
+
+                // Sound file section
+                const audioContainer = document.createElement('div');
+                audioContainer.classList.add('audio-container');
+
+                const audioElement = document.createElement('audio');
+                audioElement.controls = true;
+                audioElement.src = sound.soundclip; // Assuming sound object has a 'soundclip' property
+                audioElement.classList.add('sound-audio');
+
+                audioContainer.appendChild(audioElement);
+
+                // Save button
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');
+
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Play';
+                saveButton.onclick = () => updateSound(selectedGameName, sound.soundclip, textInput.value);
+
+                buttonContainer.appendChild(saveButton);
+
+                // Append each section to the sound item div
+                soundDiv.appendChild(textContainer);
+                soundDiv.appendChild(audioContainer);
+                soundDiv.appendChild(buttonContainer);
+
+                container.appendChild(soundDiv);
+            });
+        };
+
+        // Function to fetch available sounds and display them
+        const getAvailableSoundTexts = async () => {
+            try {
+                const response = await fetch(`/getSoundTexts/${selectedGameName}`);
+                if (!response.ok) throw new Error('Failed to fetch sounds');
+
+                const data = await response.json();
+                if (data.sounds) {
+                    displayAvailableSounds(data.sounds); // Call the display function with the fetched sounds
+                } else {
+                    console.error("No sounds found in response.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("Error loading sounds");
+            }
+        };
+
+        // Function to handle text and voice upload
+        const submitTextVoiceForm = async () => {
+            const textInput = document.querySelector(".js-sendVoiceText");
+            const voiceFileInput = document.querySelector(".js-soundFileInput");
+            const sendButton = document.querySelector(".js-soundUploadSubmitButton");
+            const textContent = textInput.value;
+
+            if (!textContent || !voiceFileInput.files.length) {
+                // Flash the button red if text or voice file is missing
+                sendButton.classList.add("flash-error");
+                setTimeout(() => {
+                    sendButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("gameName", selectedGameName);
+            formData.append("text", textContent);
+            formData.append("voice", voiceFileInput.files[0]);
+
+            try {
+                const response = await fetch("/upload-text-voice", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Failed to upload text and voice");
+
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    // Flash the button green on success
+                    sendButton.classList.add("flash-success");
+                    setTimeout(() => {
+                        sendButton.classList.remove("flash-success");
+                    }, 200); // Remove the class after 0.2 seconds
+
+                    // Clear the text input and file input
+                    textInput.value = "";
+                    voiceFileInput.value = "";
+                    document.querySelector(".js-soundFileLabel").textContent = "No file chosen";
+
+                    getAvailableSoundTexts();
+                } else {
+                    throw new Error("Failed to upload text and voice");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                // Flash the button red on any error
+                sendButton.classList.add("flash-error");
+                setTimeout(() => {
+                    sendButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+            }
+        };
+
+        // Update file label on voice file selection
+        document.querySelector(".js-soundFileInput").addEventListener("change", function() {
+            const label = document.querySelector(".js-soundFileLabel");
+            label.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
+        });
+
+        const getAvailableImages = async () => {
+            try {
+                const response = await fetch(`getImages/${selectedGameName}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch images');
+
+                const data = await response.json();
+
+                if (data && data.images) {
+                    displayAvailableImages(data.images);
+                } else {
+                    throw new Error("No images available for this game");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        // Helper function to display images in the container with editable fields
+        const displayAvailableImages = (images) => {
+            const container = document.querySelector('.js-availableImages');
+            container.innerHTML = ''; // Clear any existing content
+
+            images.forEach(image => {
+                const imageDiv = document.createElement('div');
+                imageDiv.classList.add('image-item');
+
+                // Image section
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('img-container');
+
+                const imgElement = document.createElement('img');
+                imgElement.src = image.image_name; // Assuming image object has a 'image_name' property
+                imgElement.alt = image.image_name;
+                imgElement.classList.add('game-image');
+
+                imgContainer.appendChild(imgElement);
+
+                // Size input section
+                const sizeContainer = document.createElement('div');
+                sizeContainer.classList.add('size-container');
+
+                const sizeLabel = document.createElement('label');
+                sizeLabel.textContent = 'Size (%): ';
+                sizeLabel.setAttribute('for', `size-${image.image_name}`);
+
+                const sizeInput = document.createElement('input');
+                sizeInput.type = 'number';
+                sizeInput.value = image.image_size;
+                sizeInput.id = `size-${image.image_name}`;
+                sizeInput.classList.add('image-size-input');
+
+                sizeContainer.appendChild(sizeLabel);
+                sizeContainer.appendChild(sizeInput);
+
+                // isLanding checkbox section
+                const landingContainer = document.createElement('div');
+                landingContainer.classList.add('landing-container');
+
+                const landingLabel = document.createElement('label');
+                landingLabel.textContent = 'Landing: ';
+                landingLabel.setAttribute('for', `landing-${image.image_name}`);
+
+                const isLandingCheckbox = document.createElement('input');
+                isLandingCheckbox.type = 'checkbox';
+                isLandingCheckbox.checked = image.isLanding;
+                isLandingCheckbox.id = `landing-${image.image_name}`;
+                isLandingCheckbox.classList.add('is-landing-checkbox');
+
+                landingContainer.appendChild(landingLabel);
+                landingContainer.appendChild(isLandingCheckbox);
+
+                // Save button
+                const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');
+
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Send';
+                saveButton.onclick = () => updateImage(selectedGameName, image.image_name, sizeInput.value, isLandingCheckbox.checked);
+
+
+                buttonContainer.appendChild(saveButton);
+
+                // Append each section to the image item div
+                imageDiv.appendChild(imgContainer);
+                imageDiv.appendChild(sizeContainer);
+                imageDiv.appendChild(landingContainer);
+                imageDiv.appendChild(buttonContainer);
+
+                container.appendChild(imageDiv);
+            });
+        }
+
+        // Helper function to update image details
+        const updateImage = async (selectedGameName, imageName, imageSize, isLanding) => {
+            const body= document.querySelector(".js-availableImages");
+            try {
+                const response = await fetch(`/updateImage/${selectedGameName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_name: imageName,
+                        image_size: parseInt(imageSize),
+                        isLanding: isLanding
+                    })
+                });
+
+                if (response.ok) {
+                    const response = await fetch(`/send_image/${selectedGameName}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image_name: imageName,
+                            image_size: parseInt(imageSize)
+                        })
+                    });
+                    getAvailableImages(); // Refresh the list after updating
+                    body.classList.add("flash-success");
+                    setTimeout(() => {
+                        body.classList.remove("flash-success");
+                    }, 200); // Remove the class after 0.2 seconds
+                } else {
+                    throw new Error('Failed to update image');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                body.classList.add("flash-error");
+                setTimeout(() => {
+                    body.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+            }
+        }
+
+        
+        // Update file label on image selection
+        document.querySelector(".js-imageFileInput").addEventListener("change", function() {
+            const label = document.querySelector(".js-imageFileLabel");
+            label.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
+        });
+
+        // Function to handle image upload with button flashing feedback
+        const uploadImageFile = async () => {
+            const imageFileInput = document.querySelector(".js-imageFileInput");
+            const uploadButton = document.querySelector(".js-imageUploadSubmitButton");
+
+            if (!imageFileInput.files.length) {
+                // Flash the button red if no file is selected
+                uploadButton.classList.add("flash-error");
+                setTimeout(() => {
+                    uploadButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("gameName", selectedGameName); // Add selected game name
+            formData.append("image", imageFileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to upload image');
+
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    // Flash the button green on success
+                    uploadButton.classList.add("flash-success");
+                    setTimeout(() => {
+                        uploadButton.classList.remove("flash-success");
+                    }, 200); // Remove the class after 0.2 seconds
+
+                    // Clear the file input and file label
+                    imageFileInput.value = '';
+                    document.querySelector(".js-imageFileLabel").textContent = 'No file chosen';
+
+                    getAvailableImages();
+                } else {
+                    throw new Error("Failed to upload image");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+
+                // Flash the button red on any error
+                uploadButton.classList.add("flash-error");
+                setTimeout(() => {
+                    uploadButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.2 seconds
+            }
+        };
+
+        // Modify text form submission to use js- class selectors
+        const submitTextForm = async () => {
+            const textInput = document.querySelector(".js-sendNoVoiceText");
+            const sendButton = document.querySelector(".js-sendNoVoiceSubmitButton");
+            const textContent = textInput.value;
+
+            if (!textContent) {
+                // Flash the button red if no text is entered
+                sendButton.classList.add("flash-error");
+                setTimeout(() => {
+                    sendButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.5 seconds
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/send_text", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ content: textContent }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.result) {
+                    // Flash the button green on success
+                    sendButton.classList.add("flash-success");
+                    setTimeout(() => {
+                        sendButton.classList.remove("flash-success");
+                    }, 200); // Remove the class after 0.5 seconds
+
+                    // Clear the text input field
+                    textInput.value = "";
+                } else {
+                    throw new Error("Failed to send text.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                // Flash the button red on any error
+                sendButton.classList.add("flash-error");
+                setTimeout(() => {
+                    sendButton.classList.remove("flash-error");
+                }, 200); // Remove the class after 0.5 seconds
+            }
+        };
+
+        const showLandingImage = async () => {
+            try {
+                const response = await fetch(`getImages/${selectedGameName}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch images');
+
+                const data = await response.json();
+
+                for(image of data.images){
+                    if(image.isLanding == true){
+                        const response = await fetch(`/send_image/${selectedGameName}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                image_name: image.image_name,
+                                image_size: image.image_size
+                            })
+                        });
+                    }
+                }
+
+                // if (data && data.images) {
+                //     displayAvailableImages(data.images);
+                // } else {
+                //     throw new Error("No images available for this game");
+                // }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+
+        const showGameSettings = async function(gameTitle) {
+            try {
+                const response = await fetch(`/getGames/${gameTitle}`);
+                if (!response.ok) throw new Error('Failed to fetch game');
+                
+                const game = await response.json();
+
+                let html="<"
+                
+                document.querySelector(".js-gameTitle").innerHTML = gameTitle;
+
+                selectedGameName=gameTitle;
+                getAvailableImages();
+                getAvailableSoundTexts();
+                showLandingImage();
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+
+        const showGameScreen = (gameTitle) => {
+            jsGameSelection.classList.add("hideScreen");
+            jsGame.classList.remove("hideScreen");
+
+            showGameSettings(gameTitle);
+
+
+        }
+
+        // Function to fetch and display games
+        const getGames = async function() {
+            try {
+                const response = await fetch('/getGames');
+                if (!response.ok) throw new Error('Failed to fetch games');
+                
+                const games = await response.json();
+                
+                // Create HTML content for each game with its thumbnail
+                const gamesHtml = games.map(game => `
+                    <div class="gameSceenButton" style="background-image: url('${game.thumbnail || '/static/default-thumbnail.jpg'}')" onclick="showGameScreen('${game.name}')">
+                        ${game.name}
+                    </div>
+                `).join('');
+                
+                // Insert the games into the selection screen element
+                jsGameSelectionScreen.innerHTML = gamesHtml;
+            } catch (error) {
+                console.error('Error:', error);
+                jsGameSelectionScreen.innerHTML = '<p>Error loading games</p>';
+            }
+        };
+
+        // Show modal when "+" button is clicked
+        document.querySelector(".js-createGameButton").addEventListener("click", () => {
+            document.querySelector(".js-modal").classList.add("active");
+        });
+
+        // Close modal function
+        const closeModal = () => {
+            document.querySelector(".js-modal").classList.remove("active");
+            const gameNameInput = document.getElementById("gameName");
+            const thumbnailInput = document.getElementById("thumbnail");
+            // Clear input fields
+            gameNameInput.value = '';
+            thumbnailInput.value = '';
+            document.querySelector(".file-label").textContent = 'No file chosen';
+
+        };
+
+        // Update file name label on file selection
+        document.getElementById("thumbnail").addEventListener("change", function() {
+            const label = document.querySelector(".file-label");
+            label.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
+        });
+
+        // Function to handle game creation
+        const createGame = async () => {
+            const gameNameInput = document.getElementById("gameName");
+            const thumbnailInput = document.getElementById("thumbnail");
+
+            const gameName = gameNameInput.value;
+            
+            if (!gameName || !thumbnailInput.files.length) {
+                alert("Please provide both a game name and a thumbnail.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("gameName", gameName);
+            formData.append("thumbnail", thumbnailInput.files[0]);
+
+            try {
+                const response = await fetch('/createGame', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to create game');
+
+                // Clear input fields
+                gameNameInput.value = '';
+                thumbnailInput.value = '';
+                document.querySelector(".file-label").textContent = 'No file chosen';
+
+                // Close the modal and refresh the games
+                closeModal();
+                getGames();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error creating game');
+            }
+        };
+
+        const init = function(){
+            jsGameSelectionScreen = document.querySelector(".js-gameSelectionScreen");
+            jsGameSelection = document.querySelector(".js-gameSelection");
+            jsGame = document.querySelector(".js-game");
+            jsGameScreen = document.querySelector(".js-gameScreen");
+            getGames();
+        };
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</body>
+</html>
