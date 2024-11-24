@@ -12,83 +12,51 @@
             font-weight: normal;
             font-style: normal;
         }
-
+    
         body {
             background-color: black;
+            color: white;
+            font-family: 'Cinzel Decorative', sans-serif;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: white;
+            height: 100vh; /* Full viewport height */
+        }
+    
+        .center-content {
             text-align: center;
         }
-
-        .center-content {
-            width: 60%;
-            max-width: 600px;
-        }
-
+    
         #textMessage {
-            font-family: 'Cinzel Decorative', cursive;
-            font-size: 36px;
-            line-height: 1.5;
-            padding: 20px;
-            color: #e0e0e0;
-            text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.7);
-            animation: pulseGlow 2s infinite alternate;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
-
-        #imageMessage img {
+    
+        #currentImage {
+            max-width: 100%;
             height: auto;
-        }
-
-        .is_hidden {
             display: none;
-        }
-
-        @keyframes pulseGlow {
-            0% {
-                text-shadow: 2px 2px 8px rgba(255, 0, 0, 0.9);
-            }
-            100% {
-                text-shadow: 4px 4px 12px rgba(255, 0, 0, 0.7);
-            }
+            margin: 0 auto; /* Center the image horizontally */
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include jQuery with a local fallback -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script>
+        if (typeof jQuery === "undefined") {
+            document.write('<script src="/static/js/jquery-1.12.4.min.js"><\/script>');
+        }
+    </script>
 </head>
 <body>
     <div class="center-content">
-        <div id="textMessage"></div>
-        <div id="imageMessage">
-            <!-- Image container without a default image -->
-            <img id="currentImage" class="is_hidden" alt="Game Image">
-        </div>
+        <div id="textMessage">Loading...</div>
+        <img id="currentImage" alt="Game Image">
     </div>
 
-    <script type="text/javascript">
-        var currentImageUrl = null; // Start with no image URL
-
-        function fetchImageSizes() {
-            $.ajax({
-                url: "/api/get_image_sizes",
-                method: "GET",
-                success: function(data) {
-                    if (data.result) {
-                        var sizes = data.sizes;
-
-                        // Apply saved size if available for the current image
-                        if (sizes[currentImageUrl]) {
-                            var savedSize = sizes[currentImageUrl];
-                            $('#currentImage').css('width', savedSize + '%');
-                        }
-                    }
-                }
-            });
-        }
-
-        fetchImageSizes();
+    <script>
+        var currentImageUrl = null;
 
         function fetchUpdates() {
             $.ajax({
@@ -96,47 +64,45 @@
                 method: "GET",
                 success: function(data) {
                     var textDiv = $('#textMessage');
-                    var imageDiv = $('#imageMessage');
                     var imageElement = $('#currentImage');
 
-                    textDiv.html(''); // Clear text container
-
                     if (data.result && data.messages.length > 0) {
-                        let hasTextMessage = false;
+                        var hasTextMessage = false;
 
                         data.messages.forEach(function(message) {
                             if (message.type === 'text') {
-                                textDiv.html('<p>' + message.content + '</p>');
+                                textDiv.text(message.content);
                                 hasTextMessage = true;
                             } else if (message.type === 'image') {
                                 if (currentImageUrl !== message.content) {
                                     currentImageUrl = message.content;
-                                    imageElement.attr('src', message.content).removeClass('is_hidden');
+                                    imageElement.attr('src', message.content).show();
                                 }
-
-                                var imageSize = message.size || 100; // Default to 100% if size not specified
+                                var imageSize = message.size || 100; // Default to 100% if not specified
                                 imageElement.css('width', imageSize + '%');
                             }
                         });
 
                         if (hasTextMessage) {
-                            imageDiv.hide();
                             textDiv.show();
+                            imageElement.hide();
                         } else {
-                            imageDiv.show();
                             textDiv.hide();
+                            imageElement.show();
                         }
                     } else {
-                        // Display a prompt when no messages are available
-                        textDiv.html('<p>Please select a game on the admin console.</p>');
+                        textDiv.text("Please select a game on the admin console.");
                         textDiv.show();
-                        imageDiv.hide();
+                        imageElement.hide();
                     }
+                },
+                error: function() {
+                    $('#textMessage').text("Failed to fetch updates.");
                 }
             });
         }
 
-        setInterval(fetchUpdates, 1000);
+        setInterval(fetchUpdates, 1000); // Update every 2 seconds
     </script>
 </body>
 </html>
