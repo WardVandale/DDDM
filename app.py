@@ -210,16 +210,10 @@ def remove_image():
         data_json_path = os.path.join(game_folder_path, 'data.json')
         image_file_path = os.path.join(images_folder_path, os.path.basename(image_name))  # Ensure we extract only the filename
 
-        # Debugging: Print paths
-        print(f"Decoded Image Name: {image_name}")
-        print(f"Full Image Path: {image_file_path}")
-
         # Check if the image exists and remove it
         if os.path.exists(image_file_path):
             os.remove(image_file_path)
-            print(f"Deleted Image: {image_file_path}")
         else:
-            print(f"Image not found: {image_file_path}")
             return jsonify({'error': 'Image file not found'}), 404
 
         # Update data.json by removing the image entry
@@ -230,9 +224,51 @@ def remove_image():
             # Filter out the image entry
             new_images = [img for img in data.get('images', []) if os.path.basename(urllib.parse.unquote(img['image_name'])) != image_name]
 
-            print(f"Updated Images List: {new_images}")
 
             data['images'] = new_images
+
+            # Save the updated data.json
+            with open(data_json_path, 'w') as json_file:
+                json.dump(data, json_file, indent=4)
+
+        return jsonify({'result': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/remove-text-voice', methods=['DELETE'])
+def remove_text_voice():
+    try:
+        data = request.get_json()
+        game_name = data.get('gameName')
+        soundclip = data.get('soundclip')
+
+        if not game_name or not soundclip:
+            return jsonify({'error': 'Game name and soundclip are required'}), 400
+
+        # Decode %20 to spaces
+        soundclip = soundclip.replace('%20', ' ')
+
+        # Define paths
+        game_folder_path = os.path.join(app.config['GAMES_FOLDER'], game_name)
+        sounds_folder_path = os.path.join(game_folder_path, 'sounds')
+        data_json_path = os.path.join(game_folder_path, 'data.json')
+        sound_file_path = os.path.join(sounds_folder_path, os.path.basename(soundclip))
+
+        # Check if the sound file exists and remove it
+        if os.path.exists(sound_file_path):
+            os.remove(sound_file_path)
+        else:
+            return jsonify({'error': 'Sound file not found'}), 404
+
+        # Update data.json by removing the sound entry
+        if os.path.exists(data_json_path):
+            with open(data_json_path, 'r') as json_file:
+                data = json.load(json_file)
+
+            # Filter out the sound entry
+            new_sounds = [snd for snd in data.get('sounds', []) if os.path.basename(snd['soundclip'].replace('%20', ' ')) != os.path.basename(soundclip)]
+
+            data['sounds'] = new_sounds
 
             # Save the updated data.json
             with open(data_json_path, 'w') as json_file:

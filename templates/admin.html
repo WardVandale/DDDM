@@ -527,20 +527,37 @@
 
                 const audioElement = document.createElement('audio');
                 audioElement.controls = true;
-                audioElement.src = sound.soundclip; // Assuming sound object has a 'soundclip' property
+                audioElement.src = sound.soundclip;
                 audioElement.classList.add('sound-audio');
 
                 audioContainer.appendChild(audioElement);
 
-                // Save button
+                // Button container
                 const buttonContainer = document.createElement('div');
                 buttonContainer.classList.add('button-container');
 
-                const saveButton = document.createElement('button');
-                saveButton.textContent = 'Play';
-                saveButton.onclick = () => updateSound(selectedGameName, sound.soundclip, textInput.value);
+                // Play Button
+                const playButton = document.createElement('button');
+                playButton.textContent = 'Play';
+                playButton.onclick = () => updateSound(selectedGameName, sound.soundclip, textInput.value);
 
-                buttonContainer.appendChild(saveButton);
+                buttonContainer.appendChild(playButton);
+
+                // ❌ Delete Button
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '❌';
+                deleteButton.classList.add('delete-button');
+                deleteButton.onclick = () => removeTextVoice(selectedGameName, sound.soundclip);
+
+                // Apply inline styles for a clean delete button
+                deleteButton.style.background = 'none';
+                deleteButton.style.border = 'none';
+                deleteButton.style.fontSize = '1.2em';
+                deleteButton.style.cursor = 'pointer';
+                deleteButton.style.marginLeft = '10px';
+                deleteButton.style.padding = '5px';
+
+                buttonContainer.appendChild(deleteButton);
 
                 // Append each section to the sound item div
                 soundDiv.appendChild(textContainer);
@@ -650,6 +667,32 @@
                 if (data.result) {
                     console.log("Image successfully removed!");
                     getAvailableImages(); // Refresh the image list after deletion
+                } else {
+                    console.error("Error:", data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        const removeTextVoice = async (gameName, soundclip) => {
+            console.log(`Attempting to delete sound: ${soundclip} from game: ${gameName}`);
+
+            try {
+                const response = await fetch('/remove-text-voice', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gameName: gameName, soundclip: soundclip })
+                });
+
+                const data = await response.json();
+                console.log('Server Response:', data);
+
+                if (!response.ok) throw new Error('Failed to remove text and voice');
+
+                if (data.result) {
+                    console.log("Text and voice successfully removed!");
+                    getAvailableSoundTexts(); // Refresh the sound list after deletion
                 } else {
                     console.error("Error:", data.error);
                 }
