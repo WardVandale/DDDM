@@ -186,6 +186,63 @@ def upload_image():
 
     return jsonify({'result': True})
 
+import os
+import json
+import urllib.parse  # Import for decoding %20
+from flask import Flask, request, jsonify
+
+@app.route('/remove-image', methods=['DELETE'])
+def remove_image():
+    try:
+        data = request.get_json()
+        game_name = data.get('gameName')
+        image_name = data.get('imageName')
+
+        if not game_name or not image_name:
+            return jsonify({'error': 'Game name and image name are required'}), 400
+
+        # Decode %20 to spaces
+        image_name = urllib.parse.unquote(image_name)
+
+        # Define paths
+        game_folder_path = os.path.join(app.config['GAMES_FOLDER'], game_name)
+        images_folder_path = os.path.join(game_folder_path, 'images')
+        data_json_path = os.path.join(game_folder_path, 'data.json')
+        image_file_path = os.path.join(images_folder_path, os.path.basename(image_name))  # Ensure we extract only the filename
+
+        # Debugging: Print paths
+        print(f"Decoded Image Name: {image_name}")
+        print(f"Full Image Path: {image_file_path}")
+
+        # Check if the image exists and remove it
+        if os.path.exists(image_file_path):
+            os.remove(image_file_path)
+            print(f"Deleted Image: {image_file_path}")
+        else:
+            print(f"Image not found: {image_file_path}")
+            return jsonify({'error': 'Image file not found'}), 404
+
+        # Update data.json by removing the image entry
+        if os.path.exists(data_json_path):
+            with open(data_json_path, 'r') as json_file:
+                data = json.load(json_file)
+
+            # Filter out the image entry
+            new_images = [img for img in data.get('images', []) if os.path.basename(urllib.parse.unquote(img['image_name'])) != image_name]
+
+            print(f"Updated Images List: {new_images}")
+
+            data['images'] = new_images
+
+            # Save the updated data.json
+            with open(data_json_path, 'w') as json_file:
+                json.dump(data, json_file, indent=4)
+
+        return jsonify({'result': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/get_updates', methods=['GET'])
 def get_updates():
     return jsonify({'result': True, 'messages': messages}) if messages else jsonify({'result': False})

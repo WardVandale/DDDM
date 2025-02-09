@@ -632,6 +632,32 @@
             label.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
         });
 
+        const removeImage = async (gameName, imageName) => {
+            console.log(`Attempting to delete: ${imageName} from game: ${gameName}`);
+
+            try {
+                const response = await fetch('/remove-image', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gameName: gameName, imageName: imageName })
+                });
+
+                const data = await response.json();
+                console.log('Server Response:', data);
+
+                if (!response.ok) throw new Error('Failed to remove image');
+
+                if (data.result) {
+                    console.log("Image successfully removed!");
+                    getAvailableImages(); // Refresh the image list after deletion
+                } else {
+                    console.error("Error:", data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
         const getAvailableImages = async () => {
             try {
                 const response = await fetch(`getImages/${selectedGameName}`, {
@@ -666,7 +692,7 @@
                 imgContainer.classList.add('img-container');
 
                 const imgElement = document.createElement('img');
-                imgElement.src = image.image_name; // Assuming image object has a 'image_name' property
+                imgElement.src = image.image_name;
                 imgElement.alt = image.image_name;
                 imgElement.classList.add('game-image');
 
@@ -714,8 +740,23 @@
                 saveButton.textContent = 'Send';
                 saveButton.onclick = () => updateImage(selectedGameName, image.image_name, sizeInput.value, isLandingCheckbox.checked);
 
-
                 buttonContainer.appendChild(saveButton);
+
+                // ❌ Delete button (styled as an emoji)
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '❌';
+                deleteButton.classList.add('delete-button');
+                deleteButton.onclick = () => removeImage(selectedGameName, image.image_name.split('/').pop());
+
+                // Apply inline styles to remove background/border
+                deleteButton.style.background = 'none';
+                deleteButton.style.border = 'none';
+                deleteButton.style.fontSize = '1.2em';
+                deleteButton.style.cursor = 'pointer';
+                deleteButton.style.marginLeft = '10px';
+                deleteButton.style.padding = '5px';
+
+                buttonContainer.appendChild(deleteButton);
 
                 // Append each section to the image item div
                 imageDiv.appendChild(imgContainer);
@@ -725,7 +766,7 @@
 
                 container.appendChild(imageDiv);
             });
-        }
+        };
 
         // Helper function to update image details
         const updateImage = async (selectedGameName, imageName, imageSize, isLanding) => {
